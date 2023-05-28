@@ -300,6 +300,7 @@ class UserManager(object):
             del self.__users[username]
 
     def check(self, username, password):
+        print(username)
         with open('test.text', 'a') as f :
             f.write(self.__users)
             f.write(username)
@@ -496,7 +497,7 @@ def main():
     else:
         show_help()
         sys.exit()
-
+    print(sys.argv)
     for arg in sys.argv[2:]:
         if arg.startswith('--port='):
             try:
