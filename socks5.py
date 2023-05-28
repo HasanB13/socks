@@ -547,6 +547,7 @@ def main():
     try:
         print('os: ', support_os, '\n -------- \n', current_os)
         if support_os.__contains__(current_os):
+            print('here')
             run_daemon_process(pid_file=pid_file, start_msg='Start SOCKS5 server at pid %s\n')
         socks5_server.serve_forever()
     except KeyboardInterrupt:
