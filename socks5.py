@@ -300,10 +300,11 @@ class UserManager(object):
             del self.__users[username]
 
     def check(self, username, password):
-        print(self.__users)
-        print(username)
-        print(password)
-        print(self.__users[username])
+        with open('test.text', 'a') as f :
+            f.write(self.__users)
+            f.write(username)
+            f.write(password)
+            f.write(self.__users[username])
         if username in self.__users and self.__users[username].get_password() == password:
             return True
         else:
