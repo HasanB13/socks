@@ -6,13 +6,13 @@
 # Filename: main
 # Description:
 # ******************************************************
-from SocketServer import BaseServer, ThreadingTCPServer, StreamRequestHandler
+from socketserver import BaseServer, ThreadingTCPServer, StreamRequestHandler
 from socket import socket, AF_INET, SOCK_STREAM
 import logging
 import signal
 import struct
 import sys
-import thread
+import _thread
 import os
 import platform
 
@@ -93,7 +93,7 @@ def run_daemon_process(stdout='/dev/null', stderr=None, stdin='/dev/null',
     try:
         if os.fork() > 0:
             sys.exit(0)  # Exit first parent.
-    except OSError, e:
+    except OSError as e:
         sys.stderr.write("fork #1 failed: (%d) %s\n" % (e.errno, e.strerror))
         sys.exit(1)
     # Decouple from parent environment.
@@ -104,20 +104,20 @@ def run_daemon_process(stdout='/dev/null', stderr=None, stdin='/dev/null',
     try:
         if os.fork() > 0:
             sys.exit(0)  # Exit second parent.
-    except OSError, e:
+    except OSError as e:
         sys.stderr.write("fork #2 failed: (%d) %s\n" % (e.errno, e.strerror))
         sys.exit(1)
     # Open file descriptors and print start message
     if not stderr:
         stderr = stdout
-        si = file(stdin, 'r')
-        so = file(stdout, 'a+')
-        se = file(stderr, 'a+', 0)  # unbuffered
+        si = open(stdin, 'r')
+        so = open(stdout, 'a+')
+        se = open(stderr, 'a+b', 0)  # unbuffered
         pid = str(os.getpid())
         sys.stderr.write(start_msg % pid)
         sys.stderr.flush()
     if pid_file:
-        file(pid_file, 'w+').write("%s\n" % pid)
+        open(pid_file, 'w+').write("%s\n" % pid)
     # Redirect standard file descriptors.
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
@@ -223,8 +223,8 @@ class SocketPipe(object):
 
     def start(self):
         self.__running = True
-        thread.start_new_thread(self.__transfer, (self._socket1, self._socket2))
-        thread.start_new_thread(self.__transfer, (self._socket2, self._socket1))
+        _thread.start_new_thread(self.__transfer, (self._socket1, self._socket2))
+        _thread.start_new_thread(self.__transfer, (self._socket2, self._socket1))
 
     def stop(self):
         self._socket1.close()
@@ -300,6 +300,10 @@ class UserManager(object):
             del self.__users[username]
 
     def check(self, username, password):
+        print(self.__users)
+        print(username)
+        print(password)
+        print(self.__users[username])
         if username in self.__users and self.__users[username].get_password() == password:
             return True
         else:
@@ -320,7 +324,7 @@ class Socks5RequestHandler(StreamRequestHandler):
         session = Session(self.connection)
         logging.info('Create session[%s] for %s:%d' % (
             1, self.client_address[0], self.client_address[1]))
-        print self.server.allowed
+        print(self.server.allowed)
         if self.server.allowed and self.client_address[0] not in self.server.allowed:
             close_session(session)
             return
@@ -418,39 +422,39 @@ class Socks5Server(ThreadingTCPServer):
 
 
 def show_help():
-    print 'Usage: start|stop|restart|status [options]'
-    print 'Options:'
-    print '  --port=<val>         Sets server port, default 1080'
-    print '  --log=true|false     Logging on, default true'
-    print '  --allowed=IP         set allowed IP list'
-    print '  --auth:<user:pwd>    Use username/password authentication'
-    print '                       Example:'
-    print '                         Create user \"admin\" with password \"1234\":'
-    print '                           --auth=admin:1234 '
-    print '                         Create tow users:'
-    print '                           --auth=admin:1234,root:1234'
-    print '  -h                   Show Help'
+    print('Usage: start|stop|restart|status [options]')
+    print('Options:')
+    print('  --port=<val>         Sets server port, default 1080')
+    print('  --log=true|false     Logging on, default true')
+    print('  --allowed=IP         set allowed IP list')
+    print('  --auth:<user:pwd>    Use username/password authentication')
+    print('                       Example:')
+    print('                         Create user \"admin\" with password \"1234\":')
+    print('                           --auth=admin:1234 ')
+    print('                         Create tow users:')
+    print('                           --auth=admin:1234,root:1234')
+    print('  -h                   Show Help')
 
 
 def check_os_support():
     if not support_os.__contains__(current_os):
-        print 'Not support in %s' % current_os
+        print('Not support in %s' % current_os)
         sys.exit()
 
 
 def stop(pid_file):
     check_os_support()
-    print 'Stopping server...',
+    print('Stopping server...')
     try:
         f = open(pid_file, 'r')
         pid = int(f.readline())
         os.kill(pid, signal.SIGTERM)
         os.remove(pid_file)
-        print "                 [OK]"
+        print("                 [OK]")
     except IOError:
-        print "pysocks is not running"
+        print("pysocks is not running")
     except OSError:
-        print "pysocks is not running"
+        print("pysocks is not running")
 
 
 def status(pid_file):
@@ -458,9 +462,9 @@ def status(pid_file):
     try:
         f = open(pid_file, 'r')
         pid = int(f.readline())
-        print 'pysocks(pid %d) is running...' % pid
+        print('pysocks(pid %d) is running...' % pid)
     except IOError:
-        print "pysocks is stopped"
+        print("pysocks is stopped")
 
 
 def main():
@@ -497,7 +501,7 @@ def main():
             try:
                 port = int(arg.split('=')[1])
             except ValueError:
-                print '--port=<val>  <val> should be a number'
+                print('--port=<val>  <val> should be a number')
                 sys.exit()
         elif arg.startswith('--auth'):
             auth = True
@@ -515,13 +519,13 @@ def main():
             elif value == 'false':
                 enable_log = False
             else:
-                print '--log=<val>  <val> should be true or false'
+                print('--log=<val>  <val> should be true or false')
                 sys.exit()
         elif arg.startswith('--allowed='):
             value = arg.split('=')[1]
             allowed_ips = value.split(',')
         else:
-            print 'Unknown argument:%s' % arg
+            print('Unknown argument:%s' % arg)
             sys.exit()
     if enable_log:
         logging.basicConfig(level=logging.INFO,
