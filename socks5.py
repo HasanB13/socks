@@ -294,6 +294,7 @@ class UserManager(object):
 
     def add_user(self, user):
         self.__users[user.get_username()] = user
+        print(self.__users)
 
     def remove_user(self, username):
         if username in self.__users:
@@ -510,6 +511,7 @@ def main():
             users = arg.split('=')[1]
             for user in users.split(','):
                 user_pwd = user.split(':')
+                print(user_pwd)
                 user_manager.add_user(User(user_pwd[0], user_pwd[1]))
         elif arg == '-h':
             show_help()
@@ -543,6 +545,7 @@ def main():
     Socks5Server.allow_reuse_address = True
     socks5_server = Socks5Server(port, auth, user_manager, allowed=allowed_ips)
     try:
+        print('os: ', support_os, '\n -------- \n', current_os)
         if support_os.__contains__(current_os):
             run_daemon_process(pid_file=pid_file, start_msg='Start SOCKS5 server at pid %s\n')
         socks5_server.serve_forever()
