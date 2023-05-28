@@ -324,7 +324,15 @@ class Socks5RequestHandler(StreamRequestHandler):
         StreamRequestHandler.__init__(self, request, client_address, server)
 
     def handle(self):
+        print('inhandle')
+        client = self.connection
+        client.recv(1)
+        length = byte_to_int(struct.unpack('b', client.recv(1))[0])
+        username = client.recv(length)
+        length = byte_to_int(struct.unpack('b', client.recv(1))[0])
+        password = client.recv(length)
         session = Session(self.connection)
+        logging.info('Session[{}], username[{}], password[{}]'.format(session.get_id(), username, password))
         logging.info('Create session[%s] for %s:%d' % (
             1, self.client_address[0], self.client_address[1]))
         print(self.server.allowed)
